@@ -1,5 +1,7 @@
 {
   "name": "ai-delivery-app",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "angular"
 }
