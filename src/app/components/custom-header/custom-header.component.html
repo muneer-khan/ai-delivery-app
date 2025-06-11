@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title slot="start">AI Delivery App</ion-title>
+
+    <div slot="end" class="header-actions">
+      <ng-container *ngIf="!isLoggedIn; else loggedInTemplate">
+        <ion-button fill="clear" size="small" (click)="goToLogin()">Login</ion-button>
+        <ion-button fill="clear" size="small" (click)="goToSignup()">Signup</ion-button>
+      </ng-container>
+
+      <ng-template #loggedInTemplate>
+        <ion-button fill="clear" size="small" (click)="goToAccount()">
+          <ion-icon name="person-circle-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" size="small" (click)="logout()">Logout</ion-button>
+      </ng-template>
+    </div>
+  </ion-toolbar>
+</ion-header>

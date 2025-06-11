@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ConfigService } from './services/config.service';
 
 @Component({
   selector: 'app-root',
@@ -7,5 +8,12 @@ import { Component } from '@angular/core';
   standalone: false,
 })
 export class AppComponent {
-  constructor() {}
-}
+  constructor(private configService: ConfigService) {
+    this.initApp();
+  }
+
+  async initApp() {
+    await this.configService.loadConfigOnce();
+    console.log('Config Loaded:', this.configService.getAll());
+  }
+  }
