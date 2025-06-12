@@ -45,9 +45,11 @@ export class HomePage {
   }
 
   async getAIResponse(input: string) {
-    const response = await firstValueFrom(this.chatService.postMessageToChat({ message: input }));
+    const response = await firstValueFrom(this.chatService.postMessageToChat({ userMessage: input }));
 
-    this.messages.push({ from: 'ai', text: response.reply });
+    console.log('AI Response:', response);
+    
+    this.messages.push({ from: 'ai', text: response.aiResponse.reply });
   }
 
   getCurrentUser() {

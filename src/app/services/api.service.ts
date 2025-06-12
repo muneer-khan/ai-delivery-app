@@ -8,7 +8,7 @@ import { getAuth } from 'firebase/auth';
   providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:5000/api'; // ✅ Update as needed
+  private baseUrl = 'http://localhost:3001/api'; 
 
   constructor(private http: HttpClient) {}
 
