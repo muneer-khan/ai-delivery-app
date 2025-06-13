@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
@@ -11,6 +11,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 })
 export class CustomHeaderComponent implements OnInit {
   isLoggedIn = false;
+   @Output() menuToggle = new EventEmitter<void>();
 
   constructor(
     private authService: AuthService, 
@@ -22,6 +23,11 @@ export class CustomHeaderComponent implements OnInit {
     this.auth.onAuthStateChanged(user => {
       this.isLoggedIn = !!user;
     });
+  }
+
+
+  onToggleSidebar() {
+    this.menuToggle.emit();
   }
 
   logout() {

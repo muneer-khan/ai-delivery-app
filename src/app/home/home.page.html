@@ -1,16 +1,38 @@
-<app-custom-header></app-custom-header>
+<app-custom-header (menuToggle)="toggleSidebar()"></app-custom-header>
+<ion-content fullscreen>
+  <div class="chat-layout" [class.sidebar-open]="sidebarOpen">
+    <!-- Sidebar -->
+    <div class="chat-sidebar" *ngIf="sidebarOpen">
+      <div class="sidebar-header">
+        <h3>Chat History</h3>
+        <ion-button fill="clear" size="small" (click)="toggleSidebar()">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </div>
+      <ul>
+        <li *ngFor="let item of chatHistory" (click)="selectChat(item)">
+          {{ item.title }}
+        </li>
+      </ul>
+    </div>
 
+    <!-- Chat Window -->
+    <div class="chat-main">
+      <div *ngFor="let msg of messages" class="message-container">
+        <div [ngClass]="{'message-row': true, 'from-user': msg.sender === 'user', 'from-ai': msg.sender === 'system'}">
+          <div class="chat-bubble">
+            {{ msg.text }}
+          </div>
+        </div>
 
-<ion-content>
-  <ion-list>
-    <ion-item *ngFor="let msg of messages">
-      <ion-label [color]="msg.from === 'user' ? 'primary' : 'medium'" class="chat-bubble">
-        <b *ngIf="msg.from === 'user'">You:</b>
-        <b *ngIf="msg.from === 'ai'">AI:</b>
-        <p>{{ msg.text }}</p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
+        <div *ngIf="msg.suggestions?.length" class="suggestions">
+          <ion-chip *ngFor="let suggestion of msg.suggestions" (click)="onSuggestionClick(suggestion)">
+            <ion-label>{{ suggestion.name }}, {{ suggestion.address }}</ion-label>
+          </ion-chip>
+        </div>
+      </div>
+    </div>
+  </div>
 </ion-content>
 
 <ion-footer>

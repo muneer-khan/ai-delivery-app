@@ -5,15 +5,30 @@ import { ConfigService } from '../services/config.service';
 import { ChatService } from '../services/chat.service';
 import { firstValueFrom } from 'rxjs';
 
+
+interface ChatSuggestion {
+  name: string;
+  address: string;
+}
+
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: false,
 })
+
 export class HomePage {
-  messages: { from: string; text: string }[] = [];
+
+  messages: { sender: string; text: string; suggestions?: ChatSuggestion[];}[] = [];
   userInput = '';
+sidebarOpen = true;
+input = '';
+
+chatHistory = [
+  { id: '1', title: 'Order #1234' },
+  { id: '2', title: 'Support Request' }
+];
 
   constructor(
     private authService: AuthService, 
@@ -38,7 +53,7 @@ export class HomePage {
       return;
     }
     
-    this.messages.push({ from: 'user', text: msg });
+    this.messages.push({ sender: 'user', text: msg });
     this.userInput = '';
 
     this.getAIResponse(msg);
@@ -49,8 +64,17 @@ export class HomePage {
 
     console.log('AI Response:', response);
     
-    this.messages.push({ from: 'ai', text: response.aiResponse.reply });
+    this.messages.push({ sender: 'system', text: response.aiResponse.reply, suggestions: response.aiResponse.suggestedAddress });
   }
+
+  toggleSidebar() {
+  this.sidebarOpen = !this.sidebarOpen;
+}
+
+selectChat(chat: any) {
+  console.log('Selected chat:', chat);
+  // Replace currentMessages with fetched data if needed
+}
 
   getCurrentUser() {
     return new Promise((resolve) => {
@@ -59,4 +83,11 @@ export class HomePage {
       });
     });
   }
+
+  onSuggestionClick(suggestion: ChatSuggestion) {
+  this.userInput = suggestion.address;
+
+  // Optionally, you can auto-send it
+  // this.sendMessage();
+}
 }
