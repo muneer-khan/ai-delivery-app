@@ -11,4 +11,12 @@ export class ChatService {
     postMessageToChat(data: any): Observable<any> {
         return this.apiService.post<any>('chat', data);
     }
+
+    getChatHistory() : Observable<any> {
+      return this.apiService.get<any[]>(`chat/history`);
+    }
+
+    setActiveChat(data: any): Observable<any> {
+        return this.apiService.post<any>('chat/set-active', data);
+    }
 }

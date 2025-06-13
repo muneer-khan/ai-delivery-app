@@ -1,0 +1,14 @@
+<div class="chat-sidebar">
+   <ion-button expand="block" color="primary" (click)="startNewChat()">
+    + New Chat
+  </ion-button>
+
+  <div class="sidebar-header">
+    <h3>Chat History</h3>
+  </div>
+  <ul>
+    <li *ngFor="let item of chatHistory" (click)="selectChat(item)" class="chat-item" [class.selected]="selectedChatId === item.id">
+      {{ item?.topic }}
+    </li>
+  </ul>
+</div>

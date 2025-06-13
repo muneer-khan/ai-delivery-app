@@ -1,0 +1,29 @@
+.chat-sidebar {
+    color: white;
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  ul {
+    padding: 0;
+    list-style: none;
+
+    li {
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 4px;
+
+      &:hover {
+        background-color: #e0e0e0;
+        color: #000;
+      }
+    }
+  }
+  .chat-item.selected {
+    background-color: #007bff;
+    color: white;
+    }
+
+}

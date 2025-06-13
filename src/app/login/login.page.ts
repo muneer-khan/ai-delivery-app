@@ -34,6 +34,6 @@ export class LoginPage {
   }
 
   closePage() {
-  this.router.navigate(['/home']); 
-}
+    this.router.navigate(['/home']); 
+  }
 }

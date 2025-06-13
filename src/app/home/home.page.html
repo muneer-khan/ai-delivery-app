@@ -2,26 +2,14 @@
 <ion-content fullscreen>
   <div class="chat-layout" [class.sidebar-open]="sidebarOpen">
     <!-- Sidebar -->
-    <div class="chat-sidebar" *ngIf="sidebarOpen">
-      <div class="sidebar-header">
-        <h3>Chat History</h3>
-        <ion-button fill="clear" size="small" (click)="toggleSidebar()">
-          <ion-icon name="close-outline"></ion-icon>
-        </ion-button>
-      </div>
-      <ul>
-        <li *ngFor="let item of chatHistory" (click)="selectChat(item)">
-          {{ item.title }}
-        </li>
-      </ul>
-    </div>
+    <app-chat-history *ngIf="sidebarOpen" (chatSelection)="selectChat($event)"></app-chat-history>
 
     <!-- Chat Window -->
     <div class="chat-main">
       <div *ngFor="let msg of messages" class="message-container">
-        <div [ngClass]="{'message-row': true, 'from-user': msg.sender === 'user', 'from-ai': msg.sender === 'system'}">
+        <div [ngClass]="{'message-row': true, 'from-user': msg.role === 'user', 'from-ai': msg.role === 'system'}">
           <div class="chat-bubble">
-            {{ msg.text }}
+            {{ msg.content }} {{ msg.suggestions?.length ? "Please select one from the list below." : "" }}
           </div>
         </div>
 
@@ -37,7 +25,7 @@
 
 <ion-footer>
   <ion-toolbar>
-    <ion-input [(ngModel)]="userInput" placeholder="Type your message..."></ion-input>
+    <ion-input [(ngModel)]="userInput" placeholder="Type your message..." (ionInput)="setInputType()"></ion-input>
     <ion-button expand="block" (click)="sendMessage()">Send</ion-button>
   </ion-toolbar>
 </ion-footer>

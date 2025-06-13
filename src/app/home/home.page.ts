@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ConfigService } from '../services/config.service';
 import { ChatService } from '../services/chat.service';
 import { firstValueFrom } from 'rxjs';
+import { ChatStateService } from '../services/chat-state.service';
 
 
 interface ChatSuggestion {
@@ -20,27 +21,36 @@ interface ChatSuggestion {
 
 export class HomePage {
 
-  messages: { sender: string; text: string; suggestions?: ChatSuggestion[];}[] = [];
+  messages: { role: string; content: string; suggestions?: ChatSuggestion[];}[] = [];
   userInput = '';
-sidebarOpen = true;
-input = '';
-
-chatHistory = [
-  { id: '1', title: 'Order #1234' },
-  { id: '2', title: 'Support Request' }
-];
+  sidebarOpen = true;
+  input = '';
+  inputType = 'text';
+  chatSessionId = '';
 
   constructor(
     private authService: AuthService, 
     private configService: ConfigService,
     private chatService: ChatService,
+    private chatStateService: ChatStateService,
     private router: Router
-  ) {}
+  ) {
+    this.chatStateService.chatRefresh$.subscribe(() => {
+      this.clearInput();
+      this.clearChat();
+    });
+  }
+
+  ngOnInit() {
+    this.clearInput();
+    this.clearChat();
+  }
 
   async sendMessage() {
     if (!this.userInput.trim()) return;
     
     const msg = this.userInput.trim();
+    const messageType = this.inputType;
 
     const isTrackingNumber = /^\d{10}$/.test(msg);
 
@@ -53,18 +63,31 @@ chatHistory = [
       return;
     }
     
-    this.messages.push({ sender: 'user', text: msg });
-    this.userInput = '';
+    this.messages.push({ role: 'user', content: msg });
+    this.clearInput();
 
-    this.getAIResponse(msg);
+    const messageData = {
+      userMessage: msg,
+      messageType: messageType,
+      sessionId: this.chatSessionId ? this.chatSessionId : null,
+    };
+
+    this.getAIResponse(messageData);
   }
 
-  async getAIResponse(input: string) {
-    const response = await firstValueFrom(this.chatService.postMessageToChat({ userMessage: input }));
+  async getAIResponse(messageData: any) {
+    const response = await firstValueFrom(this.chatService.postMessageToChat(messageData));
 
     console.log('AI Response:', response);
-    
-    this.messages.push({ sender: 'system', text: response.aiResponse.reply, suggestions: response.aiResponse.suggestedAddress });
+    if(!this.chatSessionId) {
+      this.chatStateService.triggerChatHistoryRefresh();
+    }
+    this.chatSessionId = response.aiResponse.sessionId;
+    this.messages.push({ role: 'system', content: response.aiResponse.reply, suggestions: response.aiResponse.suggestions });
+  }
+
+  setInputType() {
+    this.inputType = "text";
   }
 
   toggleSidebar() {
@@ -73,7 +96,14 @@ chatHistory = [
 
 selectChat(chat: any) {
   console.log('Selected chat:', chat);
-  // Replace currentMessages with fetched data if needed
+  if(chat && chat.id) {
+    this.chatService.setActiveChat({ sessionId: chat.id }).subscribe(response => {
+      this.chatSessionId = response.sessionId;
+      this.messages = response.messages || [];
+    });
+  } else {
+    this.clearChat();
+  }
 }
 
   getCurrentUser() {
@@ -85,9 +115,17 @@ selectChat(chat: any) {
   }
 
   onSuggestionClick(suggestion: ChatSuggestion) {
-  this.userInput = suggestion.address;
+    this.userInput = suggestion.address;
+    this.inputType = 'selection';
+  }
 
-  // Optionally, you can auto-send it
-  // this.sendMessage();
-}
+  clearInput() {
+    this.userInput = '';
+    this.inputType = 'text';
+  }
+
+  clearChat() {
+    this.messages = [];
+    this.chatSessionId = '';
+  }
 }
