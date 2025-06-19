@@ -26,7 +26,10 @@ export class ChatHistoryComponent  implements OnInit {
     private chatService: ChatService,
     private chatStateService: ChatStateService
   ) {
-    this.chatStateService.chatHistoryRefresh$.subscribe(() => {
+    this.chatStateService.chatHistoryRefresh$.subscribe((activeChatId) => {
+      if(activeChatId) {
+        this.selectedChatId = activeChatId;
+      }
       this.getChatHistory();
     });
     this.getChatHistory();

@@ -6,14 +6,14 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class ChatStateService {
 
-  private chatHistoryRefreshTrigger = new BehaviorSubject<void>(undefined);
+  private chatHistoryRefreshTrigger = new BehaviorSubject<any>(undefined);
   chatHistoryRefresh$ = this.chatHistoryRefreshTrigger.asObservable();
 
   private chatRefreshTrigger = new BehaviorSubject<void>(undefined);
   chatRefresh$ = this.chatRefreshTrigger.asObservable();
 
-  triggerChatHistoryRefresh() {
-    this.chatHistoryRefreshTrigger.next();
+  triggerChatHistoryRefresh(selectedChat?: string) {
+    this.chatHistoryRefreshTrigger.next(selectedChat);
   }
 
   triggerChatRefresh() {

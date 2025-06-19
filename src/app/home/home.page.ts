@@ -26,7 +26,8 @@ export class HomePage {
   sidebarOpen = true;
   input = '';
   inputType = 'text';
-  chatSessionId = '';
+  activeChatSessionId = '';
+  activeOrderId = '';
 
   constructor(
     private authService: AuthService, 
@@ -69,7 +70,8 @@ export class HomePage {
     const messageData = {
       userMessage: msg,
       messageType: messageType,
-      sessionId: this.chatSessionId ? this.chatSessionId : null,
+      sessionId: this.activeChatSessionId ? this.activeChatSessionId : null,
+      orderId: this.activeOrderId ? this.activeOrderId : null
     };
 
     this.getAIResponse(messageData);
@@ -79,10 +81,15 @@ export class HomePage {
     const response = await firstValueFrom(this.chatService.postMessageToChat(messageData));
 
     console.log('AI Response:', response);
-    if(!this.chatSessionId) {
-      this.chatStateService.triggerChatHistoryRefresh();
+    if(!this.activeChatSessionId && response.aiResponse.sessionId) {
+      this.chatStateService.triggerChatHistoryRefresh(response.aiResponse.sessionId);
+      this.activeChatSessionId = response.aiResponse.sessionId;
     }
-    this.chatSessionId = response.aiResponse.sessionId;
+
+    if(response.aiResponse.orderId) {
+        this.activeOrderId = response.aiResponse.orderId;
+    }
+    
     this.messages.push({ role: 'system', content: response.aiResponse.reply, suggestions: response.aiResponse.suggestions });
   }
 
@@ -98,7 +105,7 @@ selectChat(chat: any) {
   console.log('Selected chat:', chat);
   if(chat && chat.id) {
     this.chatService.setActiveChat({ sessionId: chat.id }).subscribe(response => {
-      this.chatSessionId = response.sessionId;
+      this.activeChatSessionId = response.sessionId;
       this.messages = response.messages || [];
     });
   } else {
@@ -126,6 +133,6 @@ selectChat(chat: any) {
 
   clearChat() {
     this.messages = [];
-    this.chatSessionId = '';
+    this.activeChatSessionId = '';
   }
 }
