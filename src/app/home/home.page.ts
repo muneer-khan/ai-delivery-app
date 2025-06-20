@@ -12,6 +12,14 @@ interface ChatSuggestion {
   address: string;
 }
 
+interface MessageType { 
+  role: string; 
+  content: string; 
+  suggestions?: ChatSuggestion[];
+  suggestionType?: string
+  selectionActive?: boolean
+}
+
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -21,13 +29,15 @@ interface ChatSuggestion {
 
 export class HomePage {
 
-  messages: { role: string; content: string; suggestions?: ChatSuggestion[];}[] = [];
+  messages: MessageType[] = [];
   userInput = '';
   sidebarOpen = true;
   input = '';
   inputType = 'text';
   activeChatSessionId = '';
   activeOrderId = '';
+  selectedSuggestionType: any;
+  selectedChatIndex = 0;
 
   constructor(
     private authService: AuthService, 
@@ -65,36 +75,43 @@ export class HomePage {
     }
     
     this.messages.push({ role: 'user', content: msg });
-    this.clearInput();
-
     const messageData = {
       userMessage: msg,
       messageType: messageType,
       sessionId: this.activeChatSessionId ? this.activeChatSessionId : null,
-      orderId: this.activeOrderId ? this.activeOrderId : null
+      orderId: this.activeOrderId ? this.activeOrderId : null,
+      suggestionType: this.selectedSuggestionType ? this.selectedSuggestionType : null
     };
-
+    this.messages[this.selectedChatIndex].selectionActive = false;
+    this.clearInput();
     this.getAIResponse(messageData);
   }
 
   async getAIResponse(messageData: any) {
     const response = await firstValueFrom(this.chatService.postMessageToChat(messageData));
-
-    console.log('AI Response:', response);
-    if(!this.activeChatSessionId && response.aiResponse.sessionId) {
-      this.chatStateService.triggerChatHistoryRefresh(response.aiResponse.sessionId);
-      this.activeChatSessionId = response.aiResponse.sessionId;
+    const result = response.result;
+    if(!this.activeChatSessionId && result.sessionId) {
+      this.chatStateService.triggerChatHistoryRefresh(result.sessionId);
+      this.activeChatSessionId = result.sessionId;
     }
 
-    if(response.aiResponse.orderId) {
-        this.activeOrderId = response.aiResponse.orderId;
+    if(result.orderId) {
+        this.activeOrderId = result.orderId;
+    } else {
+      this.activeOrderId = '';
     }
-    
-    this.messages.push({ role: 'system', content: response.aiResponse.reply, suggestions: response.aiResponse.suggestions });
+    this.disableSelections();
+    this.messages.push({ role: 'system', content: result.reply, suggestions: result.suggestions, suggestionType: result.suggestionType, selectionActive: true });
+  }
+
+  private disableSelections() {
+
   }
 
   setInputType() {
     this.inputType = "text";
+    this.selectedSuggestionType = '';
+    this.selectedChatIndex = 0;
   }
 
   toggleSidebar() {
@@ -113,6 +130,13 @@ selectChat(chat: any) {
   }
 }
 
+getPlaceholder(): string {
+  return this.activeChatSessionId
+    ? 'Send a message...'
+    : 'What would you like to pickup or dropoff?';
+}
+
+
   getCurrentUser() {
     return new Promise((resolve) => {
       this.authService.getCurrentUser().subscribe(user => {
@@ -121,18 +145,28 @@ selectChat(chat: any) {
     });
   }
 
-  onSuggestionClick(suggestion: ChatSuggestion) {
-    this.userInput = suggestion.address;
+  onSuggestionClick(suggestion: ChatSuggestion, msgIndex: number) {
+    this.userInput = suggestion.address || suggestion.name;
     this.inputType = 'selection';
+    console.log(msgIndex);
+    console.log(this.messages[msgIndex]);
+    
+    
+    this.selectedSuggestionType = this.messages[msgIndex].suggestionType;
+    this.selectedChatIndex = msgIndex;
   }
 
   clearInput() {
     this.userInput = '';
     this.inputType = 'text';
+    this.selectedSuggestionType = '';
+    this.selectedChatIndex = 0;
   }
 
   clearChat() {
     this.messages = [];
     this.activeChatSessionId = '';
+    this.activeOrderId = '';
+    this.selectedSuggestionType = '';
   }
 }

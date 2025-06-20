@@ -6,16 +6,16 @@
 
     <!-- Chat Window -->
     <div class="chat-main">
-      <div *ngFor="let msg of messages" class="message-container">
+      <div *ngFor="let msg of messages; let i = index" class="message-container">
         <div [ngClass]="{'message-row': true, 'from-user': msg.role === 'user', 'from-ai': msg.role === 'system'}">
           <div class="chat-bubble">
-            {{ msg.content }} {{ msg.suggestions?.length ? "Please select one from the list below." : "" }}
+            {{ msg.content }} {{ msg.selectionActive && msg.suggestions?.length ? "Please select one from the list below." : "" }}
           </div>
         </div>
 
-        <div *ngIf="msg.suggestions?.length" class="suggestions">
-          <ion-chip *ngFor="let suggestion of msg.suggestions" (click)="onSuggestionClick(suggestion)">
-            <ion-label>{{ suggestion.name }}, {{ suggestion.address }}</ion-label>
+        <div *ngIf="msg.selectionActive && msg.suggestions?.length" class="suggestions">
+          <ion-chip *ngFor="let suggestion of msg.suggestions" (click)="onSuggestionClick(suggestion, i)">
+            <ion-label>{{ suggestion.name }} {{ suggestion.address }}</ion-label>
           </ion-chip>
         </div>
       </div>
@@ -25,7 +25,7 @@
 
 <ion-footer>
   <ion-toolbar>
-    <ion-input [(ngModel)]="userInput" placeholder="Type your message..." (ionInput)="setInputType()"></ion-input>
+    <ion-input [(ngModel)]="userInput" [placeholder]="getPlaceholder()" (ionInput)="setInputType()"></ion-input>
     <ion-button expand="block" (click)="sendMessage()">Send</ion-button>
   </ion-toolbar>
 </ion-footer>
