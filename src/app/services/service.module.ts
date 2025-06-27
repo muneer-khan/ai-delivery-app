@@ -6,10 +6,11 @@ import { ApiService } from './api.service';
 import { ConfigService } from './config.service';
 import { ChatService } from './chat.service';
 import { ChatStateService } from './chat-state.service';
+import { ImageGeneratorService } from './image-generator.service';
 
 @NgModule({
   declarations: [],
   imports: [CommonModule, IonicModule],
-  providers: [AuthService, ApiService, ConfigService, ChatService, ChatStateService], 
+  providers: [AuthService, ApiService, ConfigService, ChatService, ChatStateService, ImageGeneratorService], 
 })
 export class ServiceModule {}

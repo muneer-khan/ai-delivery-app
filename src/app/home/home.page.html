@@ -9,9 +9,13 @@
       <div *ngFor="let msg of messages; let i = index" class="message-container">
         <div [ngClass]="{'message-row': true, 'from-user': msg.role === 'user', 'from-ai': msg.role === 'system'}">
           <div class="chat-bubble">
-            {{ msg.content }} {{ msg.selectionActive && msg.suggestions?.length ? "Please select one from the list below." : "" }}
+            {{ msg.content }}
           </div>
         </div>
+
+        <ng-container *ngIf="msg.image">
+          <img [src]="msg.image" style="border-radius: 12px; max-width: 100%;" />
+        </ng-container>
 
         <div *ngIf="msg.selectionActive && msg.suggestions?.length" class="suggestions">
           <ion-chip *ngFor="let suggestion of msg.suggestions" (click)="onSuggestionClick(suggestion, i)">

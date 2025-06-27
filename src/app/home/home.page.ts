@@ -5,6 +5,7 @@ import { ConfigService } from '../services/config.service';
 import { ChatService } from '../services/chat.service';
 import { firstValueFrom } from 'rxjs';
 import { ChatStateService } from '../services/chat-state.service';
+import { ImageGeneratorService } from '../services/image-generator.service';
 
 
 interface ChatSuggestion {
@@ -18,6 +19,7 @@ interface MessageType {
   suggestions?: ChatSuggestion[];
   suggestionType?: string
   selectionActive?: boolean
+  image?: any
 }
 
 @Component({
@@ -44,6 +46,7 @@ export class HomePage {
     private configService: ConfigService,
     private chatService: ChatService,
     private chatStateService: ChatStateService,
+    private imageGeneratorService: ImageGeneratorService,
     private router: Router
   ) {
     this.chatStateService.chatRefresh$.subscribe(() => {
@@ -101,9 +104,26 @@ export class HomePage {
       this.activeOrderId = '';
     }
     this.disableSelections();
-    this.messages.push({ role: 'system', content: result.reply, suggestions: result.suggestions, suggestionType: result.suggestionType, selectionActive: true });
+    await this.pushSystemResponse(result);
   }
 
+  private async pushSystemResponse(result: any) {
+    let message = {
+      role: 'system',
+      content: result.reply,
+      suggestions: result.suggestions,
+      suggestionType: result.suggestionType,
+      selectionActive: true
+    } as any;
+
+    if (result.completedOrder) {
+      const generatedOrder = await this.imageGeneratorService.generateOrderImage(result.completedOrder);
+      if (generatedOrder) {
+        message.image = generatedOrder;
+      }
+    }
+    this.messages.push(message);
+  }
   private disableSelections() {
 
   }
